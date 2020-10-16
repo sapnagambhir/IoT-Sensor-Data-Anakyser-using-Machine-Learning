@@ -1,0 +1,367 @@
+[
+    {
+        "id": "78d105f8.72caec",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "4e4c8df7.2fdea4",
+        "type": "debug",
+        "z": "78d105f8.72caec",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 790,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "7ddf1642.302ec8",
+        "type": "http request",
+        "z": "78d105f8.72caec",
+        "name": "",
+        "method": "POST",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "https://iam.cloud.ibm.com/identity/token",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "x": 390,
+        "y": 400,
+        "wires": [
+            [
+                "47781590.1157ec",
+                "c230aef0.c56ae"
+            ]
+        ]
+    },
+    {
+        "id": "fd0b2b9d.3448c8",
+        "type": "function",
+        "z": "78d105f8.72caec",
+        "name": "Pre-tocken",
+        "func": "global.set(\"temperature\",msg.payload.temperature)\nglobal.set(\"humidity\",msg.payload.Humidity)\nglobal.set(\"wind\",msg.payload.wind)\nvar apikey=\"EDjRZqOyli11h4S7VJPJZgA_Zf12d39tHntEL60hl5hy\";\nmsg.headers={\"content-type\":\"application/x-www-form-urlencoded\"}\nmsg.payload={\"grant_type\":\"urn:ibm:params:oauth:grant-type:apikey\",\"apikey\":apikey}\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 290,
+        "y": 300,
+        "wires": [
+            [
+                "7ddf1642.302ec8"
+            ]
+        ]
+    },
+    {
+        "id": "47781590.1157ec",
+        "type": "function",
+        "z": "78d105f8.72caec",
+        "name": "Pre-Prediction",
+        "func": "var temperature = global.get(\"temperature\")\nvar Humidity = global.get(\"humidity\")\nvar wind = global.get(\"wind\")\nvar token=msg.payload.access_token\nmsg.headers={'Content-Type': 'application/json',\"Authorization\":\"Bearer \"+token,\"Accept\":\"application/json\"}\nmsg.payload={\"input_data\":[{\"fields\": [[\"temperature\", \"humidity\", \"wind\"]],\"values\": [[temperature,Humidity,wind]]}]}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 610,
+        "y": 360,
+        "wires": [
+            [
+                "2a231be9.2c2f34"
+            ]
+        ]
+    },
+    {
+        "id": "c230aef0.c56ae",
+        "type": "debug",
+        "z": "78d105f8.72caec",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 620,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "1c38f333.c3dcbd",
+        "type": "function",
+        "z": "78d105f8.72caec",
+        "name": "",
+        "func": "var temperature = global.get ('temperature')\nvar humidity = global.get ('humidity')\nvar wind = global.get ('wind')\nvar output=msg.payload.predictions[0].values[0][0]\nglobal.set(\"ouptut\",output)\nmsg.payload = {\n details: {\n Rainfall: {\n temperature: temperature,\n humidity: humidity,\n wind: wind,\n output: output\n }\n }\n}\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 730,
+        "y": 280,
+        "wires": [
+            [
+                "7ece65b4.f9db3c",
+                "8216271e.20e748"
+            ]
+        ]
+    },
+    {
+        "id": "2a231be9.2c2f34",
+        "type": "http request",
+        "z": "78d105f8.72caec",
+        "name": "",
+        "method": "POST",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "https://eu-gb.ml.cloud.ibm.com/ml/v4/deployments/66c3db57-d2a2-43ea-a78a-27f449a639a9/predictions?version=2020-09-01",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "x": 780,
+        "y": 420,
+        "wires": [
+            [
+                "1c38f333.c3dcbd",
+                "26e44422.d88bac"
+            ]
+        ]
+    },
+    {
+        "id": "26e44422.d88bac",
+        "type": "debug",
+        "z": "78d105f8.72caec",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 950,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "8216271e.20e748",
+        "type": "debug",
+        "z": "78d105f8.72caec",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 950,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "7ece65b4.f9db3c",
+        "type": "ui_text",
+        "z": "78d105f8.72caec",
+        "group": "5d9911f7.5550e",
+        "order": 6,
+        "width": "17",
+        "height": "2",
+        "name": "",
+        "label": "Predicition of Rain",
+        "format": "{{msg.payload.output}}",
+        "layout": "row-center",
+        "x": 970,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "f4d8d2e3.b0fe5",
+        "type": "inject",
+        "z": "78d105f8.72caec",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 80,
+        "y": 320,
+        "wires": [
+            [
+                "fd0b2b9d.3448c8"
+            ]
+        ]
+    },
+    {
+        "id": "5b82aaf3.5be444",
+        "type": "ui_gauge",
+        "z": "78d105f8.72caec",
+        "name": "",
+        "group": "5d9911f7.5550e",
+        "order": 1,
+        "width": "6",
+        "height": "6",
+        "gtype": "gage",
+        "title": "humidity",
+        "label": "Degree",
+        "format": "{{msg.payload.Humidity}}",
+        "min": 0,
+        "max": "100",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "x": 470,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "ffdd48a1.0ef0c8",
+        "type": "ui_gauge",
+        "z": "78d105f8.72caec",
+        "name": "",
+        "group": "5d9911f7.5550e",
+        "order": 3,
+        "width": "6",
+        "height": "6",
+        "gtype": "gage",
+        "title": "wind",
+        "label": "units",
+        "format": "{{msg.payload.wind}}",
+        "min": 0,
+        "max": "60",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "x": 460,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "4713ddc7.51c724",
+        "type": "ui_gauge",
+        "z": "78d105f8.72caec",
+        "name": "",
+        "group": "5d9911f7.5550e",
+        "order": 4,
+        "width": "6",
+        "height": "6",
+        "gtype": "gage",
+        "title": "temperature",
+        "label": "",
+        "format": "{{msg.payload.temperature}}",
+        "min": 0,
+        "max": "60",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "x": 500,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "8d83bc6b.0d673",
+        "type": "ibmiot in",
+        "z": "78d105f8.72caec",
+        "authentication": "apiKey",
+        "apiKey": "29ad953.e640b6a",
+        "inputType": "evt",
+        "logicalInterface": "",
+        "ruleId": "",
+        "deviceId": "1234",
+        "applicationId": "",
+        "deviceType": "Nodemcu",
+        "eventType": "status",
+        "commandType": "",
+        "format": "json",
+        "name": "IBM IoT",
+        "service": "registered",
+        "allDevices": false,
+        "allApplications": "",
+        "allDeviceTypes": false,
+        "allLogicalInterfaces": "",
+        "allEvents": true,
+        "allCommands": "",
+        "allFormats": "",
+        "qos": 0,
+        "x": 155,
+        "y": 180,
+        "wires": [
+            [
+                "4713ddc7.51c724",
+                "5b82aaf3.5be444",
+                "ffdd48a1.0ef0c8",
+                "4e4c8df7.2fdea4"
+            ]
+        ],
+        "l": false
+    },
+    {
+        "id": "5d9911f7.5550e",
+        "type": "ui_group",
+        "z": "",
+        "name": "IoT Heart ",
+        "tab": "1344b3d2.c218fc",
+        "order": 3,
+        "disp": true,
+        "width": "17",
+        "collapse": false
+    },
+    {
+        "id": "29ad953.e640b6a",
+        "type": "ibmiot",
+        "z": "",
+        "name": "new API",
+        "keepalive": "60",
+        "serverName": "vc1ixt.messaging.internetofthings.ibmcloud.com",
+        "cleansession": true,
+        "appId": "",
+        "shared": false
+    },
+    {
+        "id": "1344b3d2.c218fc",
+        "type": "ui_tab",
+        "z": "",
+        "name": "Analysis",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    }
+]
